@@ -1,0 +1,107 @@
+# Accessing data within R
+# 1) Open the file within R
+datafile <- read.table("data/car.test.frame.txt", header = TRUE, sep = "\t")
+datafile <- as.data.frame(datafile)
+# 2) Finding out column header names
+names(datafile)
+
+# 3) Number of columns
+ncol(datafile)
+
+# 4) Number of rows
+nrow(datafile)
+
+# 5) Finding out which columns are categorical
+str(datafile)
+
+# 6) Finding out how many unique values "Type" has
+unique(datafile["Type"])
+
+# 7) Finding out how many unique values "Country" has
+unique(datafile["Country"])
+
+# 8) Value of row 57 column 3
+datafile[57,3]
+
+# 9) Values for row 24
+datafile[24,]
+
+# 10) Using 3 different methods, select row 29 with columns 1, 2, 3
+datafile[29,1:3]
+datafile[29,c(1,2,3)]
+datafile[29,c("Price", "Country", "Reliability")]
+
+# 11) Using 2 different ways, select row 45 with columns 3 and 7
+datafile[45,c(3,7)]
+datafile[45,c("Reliability", "Disp.")]
+
+# 12) Creating a data frame for the column HP using 2 different methods
+HP_df1 <- datafile$HP
+HP_df2 <- datafile[,"HP"]
+
+# Sorting and ordering data
+# 1) Select compact cars that have a reliability >= 4.
+datafile[datafile$Reliability >= 4 & !is.na(datafile$Reliability),]
+
+# 2) Find compact cars that have a reliability >= 3 from Japan, but not from the US
+datafile[datafile$Reliability >= 3 & datafile$Country == "Japan",]
+
+# 3) How many cars are manufactured in Japan/USA?
+nrow(datafile[datafile$Country == "Japan/USA",])
+
+# 4) How many cars are manufactured in the US or Japan?
+nrow(datafile[datafile$Country == "USA"|datafile$Country == "Japan",])
+
+# 5) How many cars are manufactured in the US or Japan with a reliability >= 4?
+nrow(datafile[(datafile$Country=="USA"|datafile$Country=="Japan")&datafile$Reliability >=4,])
+
+# 6) Create a subsample of 70% of your data
+sampple_size <- round(nrow(datafile)*0.7,0)
+x <- 1:60
+new_sample <- datafile[sample(x,sampple_size,replace = FALSE),]
+nrow(new_sample)
+
+# 7) Create samples for 8-fold cross validation test; each subsample as a new dataframe
+
+samp_size <- nrow(datafile) / 8
+
+indices_one <- sort(sample(seq_len(nrow(datafile)), size <- samp_size))
+indices_not_1 <- setdiff(seq_len(nrow(datafile)), indices_one)
+indices_two <- sort(sample(indices_not_1, size <- samp_size))
+indices_not_12 <- setdiff(indices_not_1, indices_two)
+indices_three <- sort(sample(indices_not_12, size <- samp_size))
+indices_not_123 <- setdiff(indices_not_12, indices_three)
+indices_four <- sort(sample(indices_not_123, size <- samp_size))
+indices_not_1234 <- setdiff(indices_not_123, indices_four)
+indices_five <- sort(sample(indices_not_1234, size <- samp_size))
+indices_not_12345 <- setdiff(indices_not_1234, indices_five)
+indices_six <- sort(sample(indices_not_12345, size <- samp_size))
+indices_not_123456 <- setdiff(indices_not_12345, indices_six)
+indices_seven <- sort(sample(indices_not_123456, size <- samp_size))
+indices_eight <- setdiff(indices_not_123456, indices_seven)
+
+data_1 <- datafile[indices_one,]
+data_2 <- datafile[indices_two,]
+data_3 <- datafile[indices_three,]
+data_4 <- datafile[indices_four,]
+data_5 <- datafile[indices_five,]
+data_6 <- datafile[indices_six,]
+data_7 <- datafile[indices_seven,]
+data_8 <- datafile[indices_eight,]
+
+# 8) Select columns that are numeric and save it as a new dataframe
+library(dplyr)
+df_num <- select_if(datafile, is.numeric)
+df_num
+
+# 9) Remove the columns HP and Price from the dataframe
+df2 <- subset(datafile, select = - c(HP, Price))
+df2
+
+# 10) Save the columns Country and Weight as a new datafame
+new_df <- datafile[, c("Country", "Weight")]
+
+# 11) Rename these two columns in the new dataframe
+names(new_df)[1] = "Origin"
+names(new_df)[2] = "lbs"
+names(new_df)
